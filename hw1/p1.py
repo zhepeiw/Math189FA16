@@ -46,9 +46,9 @@ thetaList = [linreg(X_train, y_train, reg=la) for la in lambList]
 def generateNorm():
 	thetaNormList = [np.linalg.norm(x) for x in thetaList]
 	return thetaNormList
-	plt.style.use('ggplot')
-	normPlot = plt.plot(lambList, thetaNormList, 'o')
-	plt.setp(normPlot, color='blue')
+	# plt.style.use('ggplot')
+	# normPlot = plt.plot(lambList, thetaNormList, 'o')
+	# plt.setp(normPlot, color='blue')
 
 def generateMse():
 	MSE = []
@@ -66,15 +66,34 @@ def generateMse():
 		MSE.append(s)
 	return MSE
 
+def generateMseDict():
+	mseDict = {}
+	for i in range(len(lambList)):
+		theta = thetaList[i]
+		thetaMat = np.matrix(theta)
 
-def plotInit():
+		s = 0
+		for j in range(len(X_val)):
+			XvalMat = np.matrix(X_val[j])
+			yReg = XvalMat * thetaMat
+			s += (y_val.item(j) - yReg.item(0)) ** 2
+		s /= len(X_val)
+		s = math.sqrt(s)
+		mseDict[lambList[i]] = s
+	return mseDict
+
+def plotGen():
 	plt.figure(1)
 
 	# plot mse
 	plt.style.use('ggplot')
 	plt.subplot(211)
-	MSE = generateMse()
-	MSEPlot = plt.plot(lambList, MSE, '^')
+
+	mseDict = generateMseDict()
+	sortedLambList = [key for key in sorted(mseDict)]
+	MSE = [mseDict[k] for k in sortedLambList]
+
+	MSEPlot = plt.plot(sortedLambList, MSE)
 	plt.setp(MSEPlot, color='yellow')
 	plt.title('RMSE vs lambda')
 	plt.xlabel('lambda')
@@ -84,7 +103,13 @@ def plotInit():
 	plt.style.use('ggplot')
 	plt.subplot(212)
 	norm = generateNorm()
-	normPlot = plt.plot(lambList, norm, '8')
+	normDict = {}
+	for i in range(len(norm)):
+		normDict[lambList[i]] = norm[i]
+	sortedLambList = [key for key in sorted(normDict)]
+	norm = [normDict[k] for k in sortedLambList]
+	normPlot = plt.plot(sortedLambList, norm)
+	# 
 	plt.setp(normPlot, color='blue')
 	plt.title('norm vs lambda')
 	plt.xlabel('lambda')
@@ -92,6 +117,8 @@ def plotInit():
 
 	plt.tight_layout()
 	plt.show()
+
+# plotGen()
 
 def findOptReg():
 	MSE = generateMse()
@@ -123,6 +150,25 @@ def linregD(X, y):
 	return b_diff, theta_diff
 # print linregD(X_train_d, y_train)
 # =============part e===============
+def plotGenE(OBJ1, OBJ2, ITER):
+	# plot mse
+	plt.style.use('ggplot')
+	# mseDict = generateMseDict()
+	# sortedLambList = [key for key in sorted(mseDict)]
+	# MSE = [mseDict[k] for k in sortedLambList]
+
+	trainPlot, = plt.plot(ITER, OBJ1)
+	plt.setp(trainPlot, color='red')
+	normPlot, = plt.plot(ITER, OBJ2)
+	plt.setp(normPlot, color='blue')
+	plt.legend((trainPlot, normPlot), ('Train', 'Validation'), loc=1)
+	plt.title('RMSE vs iteration')
+	plt.xlabel('iteration')
+	plt.ylabel('RMSE')
+	
+
+	plt.show()
+
 def gradientDescent():
 	X_train_d = X_train[:,1:]
 	X_val_d = X_val[:,1:]
@@ -172,7 +218,11 @@ def gradientDescent():
 	# print np.linalg.norm(theta_opt), b_
 	# b_diff = abs((theta_opt[0] - b_).item(0))
 	# print b_diff
-	
+
 	print('==> Distance between intercept and orig: {}'.format(abs(theta_opt.item(0) - b_)))
 	print('==> Distance between theta and original: {}'.format(np.linalg.norm(theta_ - theta_opt[1:])))
-# gradientDescent()
+
+	# plot
+	# plotGenE(obj_train, obj_val, range(ITERNUM))
+gradientDescent()
+

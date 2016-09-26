@@ -95,12 +95,16 @@ def plotGen():
 		SepalLength.append(X[i][0])
 
 	plt.style.use('ggplot')
-	setosaPlot = plt.plot(SepalLength[0: int(N / 3)], PetalWidth[0: int(N / 3)], '^')
+	setosaPlot, = plt.plot(SepalLength[0: int(N / 3)], PetalWidth[0: int(N / 3)], '^')
 	plt.setp(setosaPlot, color='yellow')
-	versicolorPlot = plt.plot(SepalLength[int(N / 3): int(2.0 * N / 3)], PetalWidth[N / 3: int(2.0 * N / 3)], 'o')
+	
+	versicolorPlot, = plt.plot(SepalLength[int(N / 3): int(2.0 * N / 3)], PetalWidth[N / 3: int(2.0 * N / 3)], 'bo')
 	plt.setp(versicolorPlot, color='blue')
-	virginicaPlot = plt.plot(SepalLength[int(2.0 * N / 3): ], PetalWidth[int(2.0 * N / 3): ], 'D')
+
+	virginicaPlot, = plt.plot(SepalLength[int(2.0 * N / 3): ], PetalWidth[int(2.0 * N / 3): ], 'D')
 	plt.setp(virginicaPlot, color='red')
+
+	plt.legend((setosaPlot,versicolorPlot,virginicaPlot), ("Setosa","versicolor","virginicaPlot"), loc=2)
 	plt.title('Petal Width vs Sepal Length')
 	plt.xlabel('Sepal Length')
 	plt.ylabel('Petal Width')
