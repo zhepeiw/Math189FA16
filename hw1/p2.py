@@ -2,7 +2,8 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import linalg, sparse
+from scipy import linalg, sparse, misc
+from sklearn.preprocessing import OneHotEncoder
 # from scipy import sparse
 print "shiiit"
 df = pd.read_csv('/Users/FernandoWang/Downloads/mnist_train.csv', sep=',', engine='python').as_matrix()
@@ -162,11 +163,132 @@ def plotGenA():
 	plt.legend((gradPlot, newtonPlot), ('Gradient Descent', 'Newton'), loc=4)
 	plt.show()
 
-plotGenA()
-# def plotGen():
-# 	plotGenA()
-# 	plotGenB()
+def accuracy(y_test, y_predict):
+	correct = 0
+	for i in range(len(y_test)):
+		if (y_test[i] == y_predict[i]):
+			correct += 1
+	return correct * 1. / len(y_test)
 
+def get_accuracy_for_lambda(l):
+	theta_newton, objective_newton = linreg_newton(x_train_bin, y_train_bin, 
+		max_iters=300, reg=l)
+	y_predicted = x_train_bin * theta_newton
 
+	for i in range(len(y_predicted)):
+		if y_predicted[i] > 0.:
+			y_predicted[i] = 1
+		else:
+			y_predicted[i] = 0
 
+	accu = accuracy(y_test_bin, y_predicted)
+	print 'Newton accuracy: {}'.format(accu)
+	return accu
 
+def plotGenAccu():
+	ls = [1e-6] + [3.0 * i for i in range(1, 10)]
+	plt.style.use('ggplot')
+	acctPlot = plt.plot(ls, [get_accuracy_for_lambda(l) for l in ls], color='blue')	
+	plt.ylim([0, 1.1])	
+	plt.title('Accuracy vs Lambda')
+	plt.xlabel('Accuracy')
+	plt.ylabel('Lambda')
+
+	plt.show()
+
+# ========part b============
+def softmax(x):
+	s = np.exp(x - np.max(x, axis = 1))
+	return s / np.sum(s, axis=1)
+
+def log_softmax(x):
+	return x - misc.logsumexp(x, axis=1)
+
+def softmax_log_likelihood(X, y_one_hot, W, reg=1e-6):
+	X = np.matrix(X)
+	W = np.matrix(W)
+	W_Transpose = np.transpose(W)
+
+	mu = X * W
+	return np.sum(mu[y_one_hot] - misc.logsumexp(mu, axis =1)) - \
+	reg * np.einsum('ij,ji->', W_Transpose, W)/2
+
+def soft_grad_log_likelihood(X, y_one_hot, W, reg=1e-6):
+	X = np.matrix(X)
+	print X.shape
+	X_Transpose = np.transpose(X)
+	W = np.matrix(W)
+	print W.shape
+	mu = X * W
+	mu = np.exp(mu- np.max(mu, axis=1))
+	mu = mu / np.sum(mu, axis=1)
+	return X_Transpose * (mu-y_one_hot) + reg*W
+
+def softmax_grad(
+	X, y, reg=1e-6, lr=1e-8, tol=1e-6,
+	max_iters=300, batch_size=256,
+	verbose=False, print_freq=5):
+
+	enc = OneHotEncoder()
+	y_one_hot = enc.fit_transform(y.copy().reshape(-1,1)).astype(bool).toarray()
+	W = np.zeros((X.shape[1], y_one_hot.shape[1]))
+	ind = np.random.randint(0, X.shape[0], size=batch_size)
+	objective = [softmax_log_likelihood(X[ind], y_one_hot[ind], W, reg=reg)]
+	grad = soft_grad_log_likelihood(X[ind], y_one_hot[ind], W, reg=reg)
+
+	while len(objective)-1 <= max_iters and np.linalg.norm(grad) > tol:
+		if verbose and (len(objective)-1) % print_freq == 0:
+			print('[i={}] likelihood: {}. grad norm: {}'.format(len(objective)-1, \
+				objective[-1], np.linalg.norm(grad)))
+
+		ind = np.random.randint(0, X.shape[0], size=batch_size)
+		grad = soft_grad_log_likelihood(X[ind], y_one_hot[ind], W, reg=reg)
+		W = W - lr * grad
+
+		objective.append(softmax_log_likelihood(X[ind], y_one_hot[ind], W, reg=reg))
+
+	print('[i={}] done. grad norm = {:0.2f}'.format(
+		len(objective)-1, np.linalg.norm(grad)
+		))
+
+	return W, objective
+
+def genPlotB():
+	w, objective = softmax_grad(x_train_bin, y_train_bin, max_iters=500)
+
+	plt.style.use('ggplot')
+	plt.ylim([-8500, 500])
+	plt.xlim([-20,520])
+	bPlot, = plt.plot([x for x in range(len(objective))], objective, color='blue')
+	plt.title('Iteration vs Likelihood')
+	plt.xlabel('Iteration')
+	plt.ylabel('Likelihood')
+	# plt.legend((bPlot), ('Likelihood'), loc=3)
+	plt.show()
+
+# =========part c============
+def predict_knn(X_test, X_train, y_train, k=5):
+	num_data = X_test.shape[0]
+	y_pred = [0] * num_data
+
+	for i in range(num_data):
+		digit = X_test[i]
+		index = np.argpartition(1. / np.linalg.norm(X_train - digit[:,np.newaxis].T, axis=1), -k)[-k:]
+		y_pred[i] = np.argmax(np.bincount(y_train[index]))
+
+	return y_pred
+
+def generateReport():
+	num = 2500
+	X_train_sample = df[:num,1:]
+	Y_train_sample = df[:num,0]
+	X_test_sample = df_test[:num,1:]
+	Y_test_sample = df_test[:num,0]
+
+	for k in [1,5,10]:
+		print('[k={}] accuracy: {}'.format(
+			k,
+			accuracy(Y_test_sample, predict_knn(X_test_sample, X_train_sample, Y_train_sample, k=k)),
+		))
+
+# generateReport()
