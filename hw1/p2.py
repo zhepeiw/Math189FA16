@@ -163,27 +163,6 @@ def plotGenA():
 	plt.legend((gradPlot, newtonPlot), ('Gradient Descent', 'Newton'), loc=4)
 	plt.show()
 
-def accuracy(y_test, y_predict):
-	correct = 0
-	for i in range(len(y_test)):
-		if (y_test[i] == y_predict[i]):
-			correct += 1
-	return correct * 1. / len(y_test)
-
-def get_accuracy_for_lambda(l):
-	theta_newton, objective_newton = linreg_newton(x_train_bin, y_train_bin, 
-		max_iters=300, reg=l)
-	y_predicted = x_train_bin * theta_newton
-
-	for i in range(len(y_predicted)):
-		if y_predicted[i] > 0.:
-			y_predicted[i] = 1
-		else:
-			y_predicted[i] = 0
-
-	accu = accuracy(y_test_bin, y_predicted)
-	print 'Newton accuracy: {}'.format(accu)
-	return accu
 
 def plotGenAccu():
 	ls = [1e-6] + [3.0 * i for i in range(1, 10)]
