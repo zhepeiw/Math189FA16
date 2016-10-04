@@ -35,8 +35,8 @@ plt.plot(x1, y2, zorder=99)
 plt.plot(x2, y3, zorder=99)
 plt.plot(x2, y4, zorder=99)
 
-ax.fill_between(x1, y2, y1, facecolor='None', hatch="X", interpolate=True, zorder=99)
-ax.fill_between(x2, y4, y3, facecolor='None', hatch="X", interpolate=True, zorder=99)
+ax.fill_between(x1, y2, y1, facecolor='None', hatch="+", interpolate=True, zorder=99)
+ax.fill_between(x2, y4, y3, facecolor='None', hatch="+", interpolate=True, zorder=99)
 
 plt.title("p = 1: square / p = 2: circle")
 plt.xlim([-2, 2])
