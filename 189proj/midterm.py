@@ -13,8 +13,13 @@ companyList = [
 	['BWH','BWD','BWA'],
 	['IWH','IWD','IWA'],
 	['LBH','LBD','LBA'],
-	['PSH','PSD','PSA']
+	['PSH','PSD','PSA'],
+	['WHH','WHD','WHA'],
+	['VCH','VCD','VCA'],
+	['PSCH','PSCD','PSCA']
 ]
+
+
 
 def generateScoreData():
 	FTHomeScore = df[['FTHG']].as_matrix()
@@ -38,38 +43,52 @@ def generateBetData(betH, betD, betA):
 	BH = df[[betH]].as_matrix()
 	BD = df[[betD]].as_matrix()
 	BA = df[[betA]].as_matrix()
-	N = len(BH)
-	muD = np.mean(BD)
-	betRate = []
-	for i in range(N):
-		rate = BH.item(i) / BA.item(i) * muD / BD.item(i)
-		betRate.append(rate)
+	# muD = np.mean(BD)
+	# betRate = []
+	# for i in range(N):
+	# 	rate = BH.item(i) / BA.item(i) * muD / BD.item(i)
+	# 	betRate.append(rate)
 
-	return betRate
+	return BH, BD, BA
 
 def generateXData():
-	X = []
-	for company in companyList:
-		X.append(generateBetData(company[0], company[1], company[2]))
-	return X
+	hSum = None
+	dSum = None
+	aSum = None
 
-def linreg(X, y, reg=1.0):	
-	X = np.matrix(X).transpose()
-	y = np.matrix(y).reshape(-1,1)
-	X = np.hstack((np.ones_like(y), X))
+	for company in companyList:
+		currH, currD, currA = generateBetData(company[0], company[1], company[2])
+		if hSum is None:
+			hSum = np.matrix([0.] * len(currH)).reshape(-1,1)
+			dSum = np.matrix([0.] * len(currD)).reshape(-1,1)
+			aSum = np.matrix([0.] * len(currA)).reshape(-1,1)
+		# print hSum
+		hSum += currH
+		dSum += currD
+		aSum += currA
 	
-	eye = np.eye(X.shape[1])
-	eye[0,0] = 0. # don't regularize bias term!	
-	return np.linalg.solve(X.transpose() * X + reg * eye, X.transpose() * y)
+	muD = np.mean(dSum)
+	return [hSum.item(i) / aSum.item(i) * muD / dSum.item(i) for i in range(len(hSum))]
+
+# def linreg(X, y, reg=1.0):	
+# 	X = np.matrix(X).reshape(-1,1)
+# 	y = np.matrix(y).reshape(-1,1)
+# 	X = np.hstack((np.ones_like(y), X))
+	
+# 	eye = np.eye(X.shape[1])
+# 	eye[0,0] = 0. # don't regularize bias term!	
+# 	return np.linalg.solve(X.transpose() * X + reg * eye, X.transpose() * y)
 
 def plotGen(x,y):
 	plt.style.use('ggplot')
-	# scoreDotPlot, = plt.plot(x,y,'o')
+	scoreDotPlot, = plt.plot(x,y,'o')
 	xSpace = np.linspace(0,max(x),100)
-	linregMat = linreg(x, y)
-	b = linregMat.item(0)
+	param = np.polyfit(x, y, 3)
+	print param
+	yGen = np.poly1d(param)
+	# paramList = [linregMat.item(i) for i in range(len(linregMat))]
 
-	ySpace = [k*x + b for x in xSpace]
+	ySpace = [yGen(x) for x in xSpace]
 	linePlot, = plt.plot(xSpace, ySpace, 'b')
 
 	plt.show()
@@ -78,5 +97,5 @@ def plotGen(x,y):
 Y = generateScoreData()
 # X = generateBetData(companyList[1][0], companyList[1][1], companyList[1][2])
 X = generateXData()
-# plotGen(X,Y)
-print linreg(X,Y)
+plotGen(X,Y)
+# print linreg(X, Y)
