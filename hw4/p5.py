@@ -27,7 +27,7 @@ def NMF(V, r, max_iter=200):
 		obj.append(dist(V, W * H))
 
 	
-	return W, H, [obj[i] for i in range(len(obj))]
+	return W, H, [obj[i] for i in range(len(obj)) if i % 2 == 0]
 
 def dist(V, U):
 	assert(V.shape == U.shape)
@@ -39,7 +39,8 @@ def dist(V, U):
 
 test = [[1.1,1.2,1.3,1.4], [1.8,1.7,0.6,0.5],[1.5,1.6,2.7,0.8], [2.3,2.2,1.1,1.4], [0.9,1.4,3.2,2.4]]
 V = np.matrix(test)
-W, H, obj = NMF(V, 2)
+W, H, obj = NMF(V, 3)
+print W
 
 def genCvgPlot(obj):
 	plt.style.use('bmh')
@@ -48,5 +49,6 @@ def genCvgPlot(obj):
 	plt.xlabel('# Iteration')
 	plt.ylabel('RMSE')
 	plt.plot(obj, 'r')
+	plt.savefig('confusion_5.pdf', format='pdf')
 	plt.show()
-genCvgPlot(obj)
+# genCvgPlot(obj)
