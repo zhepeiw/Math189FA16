@@ -81,27 +81,27 @@ def plotGen(x1, x2, x3, score):
 
 	plt.show()
 
-def plotGen2D(x1, x2, score, valx1, valx2, valScore):
+def plotGen2D(x1, x2, x3, score, valx1, valx2, valx3, valScore):
 	plt.figure(1)
 	plt.style.use('ggplot')
 	# plt.subplot(211)
-	xLose = [x1[i] for i in range(len(x1)) if score[i] == -1]
-	yLose = [x2[i] for i in range(len(x2)) if score[i] == -1]
+	# xLose = [x1[i] for i in range(len(x1)) if score[i] == -1]
+	# yLose = [x2[i] for i in range(len(x2)) if score[i] == -1]
 
-	xDraw = [x1[i] for i in range(len(x1)) if score[i] == 0]
-	yDraw = [x2[i] for i in range(len(x2)) if score[i] == 0]
+	# xDraw = [x1[i] for i in range(len(x1)) if score[i] == 0]
+	# yDraw = [x2[i] for i in range(len(x2)) if score[i] == 0]
 
-	xWin = [x1[i] for i in range(len(x1)) if score[i] == 1]
-	yWin = [x2[i] for i in range(len(x2)) if score[i] == 1]
+	# xWin = [x1[i] for i in range(len(x1)) if score[i] == 1]
+	# yWin = [x2[i] for i in range(len(x2)) if score[i] == 1]
 
-	X = [[x1.item(i), x2.item(i)] for i in range(len(x1))]
+	X = [[np.log(x1.item(i)), np.log(x2.item(i)), np.log(x3.item(i)), np.log(x1.item(i) / x3.item(i))] for i in range(len(x1))]
 	from sklearn import svm
-	clf = svm.SVC()
+	clf = svm.SVC(decision_function_shape='ovo')
 	clf.fit(X, score)
 
 	count = 0
 	for i in range(len(valx1)):
-		if clf.predict([valx1.item(i), valx2.item(i)]).item(0) == valScore[i]:
+		if clf.predict([np.log(valx1.item(i)), np.log(valx2.item(i)), np.log(valx3.item(i)), np.log(valx1.item(i) / valx3.item(i))]).item(0) == valScore[i]:
 			count += 1
 	print 1.0 * count / len(valx1)
 
@@ -123,4 +123,5 @@ score_val = generateScoreData(df_val)[1]
 bet_val = generateBetData(df_val, companyList[0][0], companyList[0][1],companyList[0][2])
 # print X_train.shape
 
-plotGen2D(bet_train[0], bet_train[2], score_train, bet_val[0], bet_val[2], score_val)
+plotGen2D(bet_train[0], bet_train[1], bet_train[2], \
+	score_train, bet_val[0], bet_val[1], bet_train[2], score_val)
