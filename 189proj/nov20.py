@@ -82,26 +82,25 @@ def plotGen(x1, x2, x3, score):
 	plt.show()
 
 def plotGen2D(x1, x2, x3, score, valx1, valx2, valx3, valScore):
+	from sklearn.decomposition import KernelPCA
 	plt.figure(1)
 	plt.style.use('ggplot')
-	# plt.subplot(211)
-	# xLose = [x1[i] for i in range(len(x1)) if score[i] == -1]
-	# yLose = [x2[i] for i in range(len(x2)) if score[i] == -1]
+	kpca = KernelPCA(kernel="rbf", fit_inverse_transform=True, gamma=10)
+	
+	feature1, val1 = x1**2, valx1**2
+	feature2, val2 = x2**0.5, valx2**0.5
+	feature3, val3 = x3, valx3
+	feature4, val4 = np.mean(x2) * x1 / x2 / x3, np.mean(valx2) * valx1 / valx2 / valx3
+	feature5, val5 = np.log(x1**2 / x3), np.log(valx1**2 / valx3)
 
-	# xDraw = [x1[i] for i in range(len(x1)) if score[i] == 0]
-	# yDraw = [x2[i] for i in range(len(x2)) if score[i] == 0]
-
-	# xWin = [x1[i] for i in range(len(x1)) if score[i] == 1]
-	# yWin = [x2[i] for i in range(len(x2)) if score[i] == 1]
-
-	X = [[np.log(x1.item(i)), np.log(x2.item(i)), np.log(x3.item(i)), np.log(x1.item(i) / x3.item(i))] for i in range(len(x1))]
+	X = [[feature1.item(i), feature2.item(i), feature3.item(i), feature4.item(i), feature5.item(i)] for i in range(len(x1))]
 	from sklearn import svm
 	clf = svm.SVC(decision_function_shape='ovo')
 	clf.fit(X, score)
 
 	count = 0
 	for i in range(len(valx1)):
-		if clf.predict([np.log(valx1.item(i)), np.log(valx2.item(i)), np.log(valx3.item(i)), np.log(valx1.item(i) / valx3.item(i))]).item(0) == valScore[i]:
+		if clf.predict([val1.item(i), val2.item(i), val3.item(i), val4.item(i), val5.item(i)]).item(0) == valScore[i]:
 			count += 1
 	print 1.0 * count / len(valx1)
 
@@ -124,4 +123,4 @@ bet_val = generateBetData(df_val, companyList[0][0], companyList[0][1],companyLi
 # print X_train.shape
 
 plotGen2D(bet_train[0], bet_train[1], bet_train[2], \
-	score_train, bet_val[0], bet_val[1], bet_train[2], score_val)
+	score_train, bet_val[0], bet_val[1], bet_val[2], score_val)
