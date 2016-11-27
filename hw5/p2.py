@@ -2,12 +2,14 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+# ========reading data========
 df = pd.read_csv('classification.csv', sep=',', engine='python').as_matrix()
 X = df[:, :2]
 ones = np.ones((X.shape[0], 1))
 X = np.matrix(np.hstack((ones, X)))
 Y = np.matrix(df[:, 2])
 V0 = 100 * np.matrix(np.identity(X.shape[1]))
+
 # ========problem 2========
 def sigmoid(x):
     return 1. / (1 + np.exp(-x))
@@ -33,8 +35,6 @@ def findOptTheta(X, Y, V, alpha=1.8, max_iter=10000, freq=100):
 
     return theta
 
-
-
 def hessian(theta, X, V):
     mu = sigmoid(theta.transpose() * X)
     S = np.zeros((X.shape[1], X.shape[1]))
@@ -45,7 +45,6 @@ def hessian(theta, X, V):
 
     Vinv = np.linalg.inv(V)
     return X * S * X.transpose() - 0.5 * (Vinv + Vinv.transpose())
-
 
 theta_opt = findOptTheta(X.transpose(), Y.transpose(), V0)
 hessian_opt = hessian(theta_opt, X.transpose(), V0)
@@ -66,10 +65,6 @@ def generateReport2():
 def generateSamples(theta, cov, sampleSize):
     samples = np.random.multivariate_normal(theta, cov, sampleSize)
     ans = [np.matrix(sample).transpose() for sample in samples]
-    # for i in range(sampleSize):
-    #     theta_s = np.random.multivariate_normal(theta, cov)
-    #     theta_s = np.matrix(theta_s).transpose()
-    #     ans.append(theta_s)
     return ans
 
 def genPredDensity(x, y, theta):
@@ -100,12 +95,10 @@ def genDataPlot(X, Y):
         yAxis = [k * x + bias for x in xAxis]
         boundaryPlot, = plt.plot(xAxis, yAxis, 'g')
 
-
     # plot optimal boundary
     bias, k = -theta_opt.item(0) / theta_opt.item(2), -theta_opt.item(1) / theta_opt.item(2)
     yAxis = [k * x + bias for x in xAxis]
     optPlot, = plt.plot(xAxis, yAxis, color='purple')
-
 
     # plot predicted boundary
     xAxis = np.linspace(1.01 * np.min(feature1), 1.01 * np.max(feature1), num=201)
@@ -123,8 +116,6 @@ def genDataPlot(X, Y):
 
     predBound, = plt.plot(xPredList, yPredList, 'r')
                     
-
-
     plt.axis([1.1 * np.min(feature1), 1.1 * np.max(feature1), 1.1 * np.min(feature2), 1.1 * np.max(feature2)])
     plt.xlabel('hours studied')
     plt.ylabel('grade in class')
