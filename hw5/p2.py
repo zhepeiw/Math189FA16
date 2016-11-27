@@ -64,12 +64,17 @@ def generateReport2():
 
 # ========problem 3========
 def generateSamples(theta, cov, sampleSize):
-    ans = []
-    for i in range(sampleSize):
-        theta_s = np.random.multivariate_normal(theta, cov)
-        theta_s = np.matrix(theta_s).transpose()
-        ans.append(theta_s)
+    samples = np.random.multivariate_normal(theta, cov, sampleSize)
+    ans = [np.matrix(sample).transpose() for sample in samples]
+    # for i in range(sampleSize):
+    #     theta_s = np.random.multivariate_normal(theta, cov)
+    #     theta_s = np.matrix(theta_s).transpose()
+    #     ans.append(theta_s)
     return ans
+
+def genPredDensity(x, y, theta):
+    predX = np.matrix([1, x, y]).transpose()
+    return sigmoid(theta.transpose() * predX).item(0)
 
 def genDataPlot(X, Y):
     plt.style.use('bmh')
@@ -82,22 +87,50 @@ def genDataPlot(X, Y):
 
     # plot scatters of original data
     negPlot, = plt.plot(feature1Neg, feature2Neg, 'bo')
-    posPlot, = plt.plot(feature1Pos, feature2Pos, 'r.')
+    posPlot, = plt.plot(feature1Pos, feature2Pos, 'm.')
+
+    xAxis = np.linspace(np.min(feature1) - 1, np.max(feature1) + 1, num=11)
 
     # generate samples of theta
-    thetas = generateSamples([theta_opt.item(i) for i in range(theta_opt.shape[0])], np.linalg.inv(hessian_opt), 20)
-    # thetas = [theta_opt]
-    xAxis = np.linspace(np.min(feature1) - 1, np.max(feature1) + 1, num=11)
+    sampleSize = 20
+    thetas = generateSamples([theta_opt.item(i) for i in range(theta_opt.shape[0])], np.linalg.inv(hessian_opt), sampleSize)
 
     for theta in thetas:
         bias, k = -theta.item(0) / theta.item(2), -theta.item(1) / theta.item(2)
         yAxis = [k * x + bias for x in xAxis]
         boundaryPlot, = plt.plot(xAxis, yAxis, 'g')
 
-    plt.axis([1.1 * np.min(feature1), 1.1 * np.max(feature1), 1.11 * np.min(feature2), 1.11 * np.max(feature2)])
+
+    # plot optimal boundary
+    bias, k = -theta_opt.item(0) / theta_opt.item(2), -theta_opt.item(1) / theta_opt.item(2)
+    yAxis = [k * x + bias for x in xAxis]
+    optPlot, = plt.plot(xAxis, yAxis, color='purple')
+
+
+    # plot predicted boundary
+    xAxis = np.linspace(1.01 * np.min(feature1), 1.01 * np.max(feature1), num=201)
+    yAxis = np.linspace(1.01 * np.min(feature2), 1.01 * np.max(feature2), num=201)
+    xPredList, yPredList = [], []
+    for x in xAxis:
+        for y in yAxis:
+            p = 0
+            for theta in thetas:
+                p += genPredDensity(x, y, theta)
+            p /= sampleSize
+            if abs(p - 0.5) < 1e-3:
+                xPredList.append(x)
+                yPredList.append(y)
+
+    predBound, = plt.plot(xPredList, yPredList, 'r')
+                    
+
+
+    plt.axis([1.1 * np.min(feature1), 1.1 * np.max(feature1), 1.1 * np.min(feature2), 1.1 * np.max(feature2)])
     plt.xlabel('hours studied')
     plt.ylabel('grade in class')
-    plt.legend((negPlot, posPlot, boundaryPlot), ('failed', 'passed', 'boundary'), loc=3)
+    plt.legend((negPlot, posPlot, boundaryPlot, optPlot, predBound), \
+        ('failed', 'passed', 'sample boundary', 'MAP boundary', 'predicted boundary'), loc=3)
+    plt.savefig('p3.pdf', format='pdf')
     plt.show()
 
 
