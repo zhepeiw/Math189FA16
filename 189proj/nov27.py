@@ -6,47 +6,6 @@ import random
 import math
 from collections import defaultdict
 
-# df_train = pd.read_csv('E0.csv', sep=',', engine='python')
-# df_train.describe()
-
-# df_val = pd.read_csv('E2017.csv', sep=',', engine='python')
-# df_val.describe()
-
-# companyList = [
-# 	['B365H','B365D','B365A'],
-# 	['BWH','BWD','BWA'],
-# 	['IWH','IWD','IWA'],
-# 	['LBH','LBD','LBA'],
-# 	['PSH','PSD','PSA'],
-# 	['WHH','WHD','WHA'],
-# 	['VCH','VCD','VCA'],
-# 	['PSCH','PSCD','PSCA']
-# ]
-
-# def generateScoreData(dataSet):
-# 	FTHomeScore = dataSet[['FTHG']].as_matrix()
-# 	FTAwayScore = dataSet[['FTAG']].as_matrix()
-
-# 	FTScoreDiff = [FTHomeScore.item(i) - FTAwayScore.item(i) for i in range(len(FTHomeScore))]
-# 	FTResult = []
-# 	for s in FTScoreDiff:
-# 		if s > 0:
-# 			FTResult.append(1)
-# 		elif s < 0:
-# 			FTResult.append(-1)
-# 		else:
-# 			FTResult.append(0)
-
-# 	return FTScoreDiff, FTResult
-
-
-
-# def generateBetData(dataSet, betH, betD, betA):
-# 	BH = dataSet[[betH]].as_matrix()
-# 	BD = dataSet[[betD]].as_matrix()
-# 	BA = dataSet[[betA]].as_matrix()
-
-# 	return BH, BD, BA
 def plotGen2D(x1, x2, score):
 	plt.figure(1)
 	plt.style.use('bmh')
