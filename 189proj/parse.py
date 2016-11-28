@@ -15,7 +15,7 @@ companyList = [
 ]
 
 dirname = "data"
-years = [os.path.join(dirname, o) for o in os.listdir(dirname) if os.path.isdir(os.path.join(dirname, o))][5:6]
+years = [os.path.join(dirname, o) for o in os.listdir(dirname) if os.path.isdir(os.path.join(dirname, o))][:16]
 
 def generateScoreData(dataSet):
 	FTHomeScore = dataSet[['FTHG']].as_matrix()
@@ -31,7 +31,7 @@ def generateScoreData(dataSet):
 		else:
 			FTResult.append(0)
 
-	return FTScoreDiff
+	return FTResult
 
 def generateBetData(dataSet, betH, betD, betA):
 	BH = dataSet[[betH]].as_matrix()

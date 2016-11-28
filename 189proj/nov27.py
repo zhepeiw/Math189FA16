@@ -47,7 +47,25 @@ from collections import defaultdict
 # 	BA = dataSet[[betA]].as_matrix()
 
 # 	return BH, BD, BA
+def plotGen2D(x1, x2, score):
+	plt.figure(1)
+	plt.style.use('bmh')
+	# plt.subplot(211)
+	xLose = [np.log(x1[i]) for i in range(len(x1)) if score[i] == -1]
+	yLose = [x2[i] for i in range(len(x2)) if score[i] == -1]
 
+	xDraw = [np.log(x1[i]) for i in range(len(x1)) if score[i] == 0]
+	yDraw = [x2[i] for i in range(len(x2)) if score[i] == 0]
+
+	xWin = [np.log(x1[i]) for i in range(len(x1)) if score[i] == 1]
+	yWin = [x2[i] for i in range(len(x2)) if score[i] == 1]
+
+	losePlot, = plt.plot(xLose, yLose,'ro')
+	drawPlot, = plt.plot(xDraw, yDraw,'bo')
+	winPlot, = plt.plot(xWin, yWin, 'go')
+	plt.legend((losePlot,drawPlot,winPlot), ("Home Lose","Draw","Home Win"), loc=1)
+
+	plt.show()
 
 def plotGen(x1, x2, x3, score):
 	plt.figure(1)
@@ -92,28 +110,31 @@ def generateReport(x1, x2, x3, score, valx1, valx2, valx3, valScore):
 	feature5, val5 = np.log(x1**2 / x3), np.log(valx1**2 / valx3)
 
 	X = [[feature1.item(i), feature2.item(i), feature3.item(i), feature4.item(i), feature5.item(i)] for i in range(len(x1))]
+	# X_kpca = kpca.fit_transform(X)
+	# print X_kpca
+	# print np.matrix(X).shape, np.matrix(X_kpca).shape
 	from sklearn import svm
 	clf = svm.SVC(decision_function_shape='ovo')
 	clf.fit(X, score)
 
+	Val = [[val1.item(i), val2.item(i), val3.item(i), val4.item(i), val5.item(i)] for i in range(len(valx1))]
 	count = 0
-	for i in range(len(valx1)):
-		if clf.predict([val1.item(i), val2.item(i), val3.item(i), val4.item(i), val5.item(i)]).item(0) == valScore[i]:
+	for i in range(len(Val)):
+		if clf.predict(Val[i]).item(0) == valScore[i]:
 			count += 1
-	print 1.0 * count / len(valx1)
+	return 1.0 * count / len(valx1)
 
-def generateData():
+def generateData(trainRatio):
 	import parse
 	xData, yData = parse.generate()
 	xData, yData = np.matrix(xData), np.matrix(yData)
 	# print len(yData.tolist()[0])
-	trainBound = int(0.9 * xData.shape[1])
+	trainBound = int(trainRatio * xData.shape[1])
 	xTrain, yTrain = xData[:, :trainBound], yData[:, :trainBound]
 	xVal, yVal = xData[:, trainBound:], yData[:, trainBound:]
 	return xTrain.tolist(), yTrain.tolist()[0], xVal.tolist(), yVal.tolist()[0]
 
-xTrain, yTrain, xVal, yVal = generateData()
-# print len(yTrain)
+xTrain, yTrain, xVal, yVal = generateData(0.8)
 xTrain1 = np.asarray(xTrain[0]).reshape(len(xTrain[0]), 1)
 xTrain2 = np.asarray(xTrain[1]).reshape(len(xTrain[1]), 1)
 xTrain3 = np.asarray(xTrain[2]).reshape(len(xTrain[2]), 1)
@@ -124,5 +145,9 @@ xVal3 = np.asarray(xVal[2]).reshape(len(xVal[2]), 1)
 yVal = np.asarray(yVal).reshape(len(yVal), 1)
 del xTrain, xVal
 
-generateReport(xTrain1, xTrain2, xTrain3, yTrain, \
+
+accu = generateReport(xTrain1, xTrain2, xTrain3, yTrain, \
 	xVal1, xVal2, xVal3, yVal)
+print "Prediction accuracy: {} percent".format(str(accu * 100))
+# plotGen2D(xTrain1, xTrain3, yTrain)
+# Accuracy: 0.491675757719
