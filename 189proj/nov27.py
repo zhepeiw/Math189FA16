@@ -97,7 +97,7 @@ def plotGen(x1, x2, x3, score):
 
 	plt.show()
 
-def generateReport(x1, x2, x3, score, valx1, valx2, valx3, valScore):
+def generateSVM(x1, x2, x3, score, valx1, valx2, valx3, valScore):
 	from sklearn.decomposition import KernelPCA
 	plt.figure(1)
 	plt.style.use('ggplot')
@@ -146,8 +146,8 @@ yVal = np.asarray(yVal).reshape(len(yVal), 1)
 del xTrain, xVal
 
 
-accu = generateReport(xTrain1, xTrain2, xTrain3, yTrain, \
+accu = generateSVM(xTrain1, xTrain2, xTrain3, yTrain, \
 	xVal1, xVal2, xVal3, yVal)
-print "Prediction accuracy: {} percent".format(str(accu * 100))
+print "Prediction accuracy: {}".format(str(accu))
 # plotGen2D(xTrain1, xTrain3, yTrain)
 # Accuracy: 0.491675757719
