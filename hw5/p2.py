@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.stats import multivariate_normal
 
 # ========reading data========
 df = pd.read_csv('classification.csv', sep=',', engine='python').as_matrix()
@@ -88,6 +89,7 @@ def genDataPlot(X, Y):
     feature2Pos = [feature2.item(i) for i in range(Y.shape[1]) if Y.item(i) == 1]
 
     # plot scatters of original data
+    plt.subplot(2,1,1)
     negPlot, = plt.plot(feature1Neg, feature2Neg, 'bo')
     posPlot, = plt.plot(feature1Pos, feature2Pos, 'ro')
 
@@ -112,7 +114,20 @@ def genDataPlot(X, Y):
     plt.ylabel('grade in class')
     plt.legend((negPlot, posPlot, optPlot), ('failed', 'passed', 'MAP estimate'), loc=3)
     plt.title('Laplace posterior')
+
+    # plot marginal
+    plt.subplot(2,1,2)
+    w1, w2 = np.mgrid[3: 7: .01, 3: 7: .01]
+    pos = np.empty(w1.shape + (3,))
+    pos[:, :, 0] = theta_opt.item(0)
+    pos[:, :, 1] = w1
+    pos[:, :, 2] = w2
+    rv = multivariate_normal([theta_opt.item(i) for i in range(theta_opt.shape[0])], np.linalg.inv(hessian_opt.tolist()))
+    plt.contour(w1, w2, rv.pdf(pos))
+    plt.title('Marginal Posterior Fixing w0 = w0*')
     plt.savefig('p2.pdf', format='pdf')
+
+    plt.tight_layout()
     plt.show()
 
 def genPredPlot(X, Y):
@@ -153,9 +168,9 @@ def genPredPlot(X, Y):
     value = sigmoid(theta_opt.transpose() * X_bias) - yPred
     plt.hist([value.item(i) for i in range(value.shape[1])], bins=100)
     plt.title('Histogram of Prediction Difference in MCMC and MAP')
-
     plt.savefig('p3.pdf', format='pdf')
+    
     plt.tight_layout()
     plt.show()
 
-genPredPlot(X, Y)
+# genDataPlot(X, Y)
