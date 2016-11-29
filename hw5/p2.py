@@ -49,7 +49,7 @@ def hessian(theta, X, V):
 theta_opt = findOptTheta(X.transpose(), Y.transpose(), V0)
 hessian_opt = hessian(theta_opt, X.transpose(), V0)
 print 'optimal theta is ' + str(theta_opt)
-print 'hessian is' + str(hessian_opt)
+print 'hessian inverse is' + str(np.linalg.inv(hessian_opt))
 
 def findPosterior(theta, theta_opt, H_opt):
     n = H_opt.shape[0]
@@ -67,9 +67,16 @@ def generateSamples(theta, cov, sampleSize):
     ans = [np.matrix(sample).transpose() for sample in samples]
     return ans
 
+def generateSamplesMat(theta, cov, sampleSize):
+    samples = np.random.multivariate_normal(theta, cov, sampleSize)
+    return samples.transpose()
+
 def genPredDensity(x, y, theta):
     predX = np.matrix([1, x, y]).transpose()
     return sigmoid(theta.transpose() * predX).item(0)
+
+def predict(predX, theta):
+    return (sigmoid(theta.transpose() * predX)).mean(axis=0)
 
 def genDataPlot(X, Y):
     plt.style.use('bmh')
@@ -82,7 +89,7 @@ def genDataPlot(X, Y):
 
     # plot scatters of original data
     negPlot, = plt.plot(feature1Neg, feature2Neg, 'bo')
-    posPlot, = plt.plot(feature1Pos, feature2Pos, 'm.')
+    posPlot, = plt.plot(feature1Pos, feature2Pos, 'ro')
 
     xAxis = np.linspace(np.min(feature1) - 1, np.max(feature1) + 1, num=11)
 
@@ -99,30 +106,56 @@ def genDataPlot(X, Y):
     bias, k = -theta_opt.item(0) / theta_opt.item(2), -theta_opt.item(1) / theta_opt.item(2)
     yAxis = [k * x + bias for x in xAxis]
     optPlot, = plt.plot(xAxis, yAxis, color='purple')
-
-    # plot predicted boundary
-    xAxis = np.linspace(1.01 * np.min(feature1), 1.01 * np.max(feature1), num=201)
-    yAxis = np.linspace(1.01 * np.min(feature2), 1.01 * np.max(feature2), num=201)
-    xPredList, yPredList = [], []
-    for x in xAxis:
-        for y in yAxis:
-            p = 0
-            for theta in thetas:
-                p += genPredDensity(x, y, theta)
-            p /= sampleSize
-            if abs(p - 0.5) < 1e-3:
-                xPredList.append(x)
-                yPredList.append(y)
-
-    predBound, = plt.plot(xPredList, yPredList, 'r')
                     
     plt.axis([1.1 * np.min(feature1), 1.1 * np.max(feature1), 1.1 * np.min(feature2), 1.1 * np.max(feature2)])
     plt.xlabel('hours studied')
     plt.ylabel('grade in class')
-    plt.legend((negPlot, posPlot, boundaryPlot, optPlot, predBound), \
-        ('failed', 'passed', 'sample boundary', 'MAP boundary', 'predicted boundary'), loc=3)
-    plt.savefig('p3.pdf', format='pdf')
+    plt.legend((negPlot, posPlot, optPlot), ('failed', 'passed', 'MAP estimate'), loc=3)
+    plt.title('Laplace posterior')
+    plt.savefig('p2.pdf', format='pdf')
     plt.show()
 
+def genPredPlot(X, Y):
+    plt.style.use('bmh')
+    feature1, feature2 = X[:, 1], X[:, 2]
 
-genDataPlot(X, Y)
+    feature1Neg = [feature1.item(i) for i in range(Y.shape[1]) if Y.item(i) == 0]
+    feature1Pos = [feature1.item(i) for i in range(Y.shape[1]) if Y.item(i) == 1]
+    feature2Neg = [feature2.item(i) for i in range(Y.shape[1]) if Y.item(i) == 0]
+    feature2Pos = [feature2.item(i) for i in range(Y.shape[1]) if Y.item(i) == 1]
+
+    # plot scatters of original data
+    plt.subplot(2,1,1)
+    negPlot, = plt.plot(feature1Neg, feature2Neg, 'bo')
+    posPlot, = plt.plot(feature1Pos, feature2Pos, 'ro')
+
+    xAxis = np.linspace(np.min(feature1) - 1, np.max(feature1) + 1, num=11)
+
+    # generate samples of theta
+    sampleSize = 8000
+    thetas = generateSamplesMat([theta_opt.item(i) for i in range(theta_opt.shape[0])], np.linalg.inv(hessian_opt), sampleSize)
+
+    # plot predicted boundary
+    XPredMat = 7 * np.random.rand(10000,2) - 3
+    X_bias = np.hstack((np.ones((XPredMat.shape[0],1)),XPredMat)).transpose()
+    yPred = predict(X_bias, np.matrix(thetas))
+    n_levels = 20
+    levels = np.linspace(1.1 * np.min(yPred), 1.1 * np.max(yPred), n_levels)
+    plt.tricontour(X_bias[1, :], X_bias[2, :], [yPred.item(i) for i in range(yPred.shape[1])], levels=levels)
+
+    plt.axis([1.1 * np.min(feature1), 1.1 * np.max(feature1), 1.1 * np.min(feature2), 1.1 * np.max(feature2)])
+    plt.xlabel('hours studied')
+    plt.ylabel('grade in class')
+    plt.legend((negPlot, posPlot), ('failed', 'passed'), loc=3)
+    plt.title('Posterior Predictive Distribution')
+
+    plt.subplot(2,1,2)
+    value = sigmoid(theta_opt.transpose() * X_bias) - yPred
+    plt.hist([value.item(i) for i in range(value.shape[1])], bins=100)
+    plt.title('Histogram of Prediction Difference in MCMC and MAP')
+
+    plt.savefig('p3.pdf', format='pdf')
+    plt.tight_layout()
+    plt.show()
+
+genPredPlot(X, Y)
