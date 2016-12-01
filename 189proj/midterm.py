@@ -93,28 +93,30 @@ def generatePrediction(x_train, y_train, x_val, order):
 def plotGen(x_train,y_train, x_val, y_val):
 	plt.figure(1)
 	plt.style.use('ggplot')
-	plt.subplot(211)
+	# plt.subplot(211)
 	scoreDotPlot, = plt.plot(x_train, y_train,'o')
 
 	xSpace = np.linspace(0,max(x_train),100)
 	param = np.polyfit(x_train, y_train, 3)
+	print param
+	
 	yGen = np.poly1d(param)
 	ySpace = [yGen(x) for x in xSpace]
 	linePlot, = plt.plot(xSpace, ySpace, 'b')
 
-	plt.subplot(212)
-	y_pred = generatePrediction(x_train, y_train, x_val, 3)	
-	# print y_pred
-	y_diff = [y_pred[i] - y_val[i] for i in range(len(y_pred))]
-	predDiffPlot, = plt.plot(x_val, y_diff, 'D')
+	# plt.subplot(212)
+	# y_pred = generatePrediction(x_train, y_train, x_val, 3)	
+	# # print y_pred
+	# y_diff = [y_pred[i] - y_val[i] for i in range(len(y_pred))]
+	# predDiffPlot, = plt.plot(x_val, y_diff, 'D')
 
-	correct = 0
-	for i in range(len(y_pred)):
-		if (y_pred[i] > 0.5 and y_val[i] > 0) \
-		or (y_pred[i] < -0.5 and y_val[i] < 0) \
-		or (-0.5 <= y_pred[i] and y_pred[i] <= 0.5 and y_val[i] == 0):
-			correct += 1
-	print "prediction rate", float(correct) / len(y_pred)
+	# correct = 0
+	# for i in range(len(y_pred)):
+	# 	if (y_pred[i] > 0.5 and y_val[i] > 0) \
+	# 	or (y_pred[i] < -0.5 and y_val[i] < 0) \
+	# 	or (-0.5 <= y_pred[i] and y_pred[i] <= 0.5 and y_val[i] == 0):
+	# 		correct += 1
+	# print "prediction rate", float(correct) / len(y_pred)
 
 	
 
