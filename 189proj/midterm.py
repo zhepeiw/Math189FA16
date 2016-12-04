@@ -23,7 +23,6 @@ companyList = [
 ]
 
 
-
 def generateScoreData(dataSet):
 	FTHomeScore = dataSet[['FTHG']].as_matrix()
 	FTAwayScore = dataSet[['FTAG']].as_matrix()
@@ -118,15 +117,22 @@ def plotGen(x_train,y_train, x_val, y_val):
 	# 		correct += 1
 	# print "prediction rate", float(correct) / len(y_pred)
 
-	
-
 	plt.show()
 
+def parseXData(xData):
+	muD = np.mean(xData[1])
+	return [xData[0][i] / xData[1][i] * muD / xData[2][i] for i in range(len(xData[0]))]
 
-Y_train = generateScoreData(df_train)
-X_train = generateXData(df_train)
-Y_val = generateScoreData(df_val)
-X_val = generateXData(df_val)
+def generateData(trainRatio):
+	import parse
+	xData, yData = parse.generate(is_score=True)
+	xData, yData = np.matrix(xData), np.matrix(yData)
+	# print len(yData.tolist()[0])
+	trainBound = int(trainRatio * xData.shape[1])
+	xTrain, yTrain = xData[:, :trainBound], yData[:, :trainBound]
+	xVal, yVal = xData[:, trainBound:], yData[:, trainBound:]
+	return parseXData(xTrain.tolist()), yTrain.tolist()[0], parseXData(xVal.tolist()), yVal.tolist()[0]
 
+
+X_train, Y_train, X_val, Y_val = generateData(0.8)
 plotGen(X_train, Y_train, X_val, Y_val)
-# print linreg(X, Y)

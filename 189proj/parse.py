@@ -17,7 +17,7 @@ companyList = [
 dirname = "data"
 years = [os.path.join(dirname, o) for o in os.listdir(dirname) if os.path.isdir(os.path.join(dirname, o))][0:17]
 
-def generateScoreData(dataSet):
+def generateScoreData(dataSet, is_score=False):
 	FTHomeScore = dataSet[['FTHG']].as_matrix()
 	FTAwayScore = dataSet[['FTAG']].as_matrix()
 
@@ -31,7 +31,10 @@ def generateScoreData(dataSet):
 		else:
 			FTResult.append(0)
 
-	return FTResult
+	if is_score:
+		return FTScoreDiff
+	else:
+		return FTResult
 
 def generateBetData(dataSet, betH, betD, betA):
 	BH = dataSet[[betH]].as_matrix()
@@ -61,7 +64,7 @@ def generateXData(dataSet):
 	return hSum / count_valid, dSum / count_valid, aSum / count_valid
 
 # Load and parse data
-def generate():
+def generate(is_score=False):
 	XData = [[], [], []]
 	YData = []
 
@@ -78,7 +81,7 @@ def generate():
 			# 	print "Error occurred while parsing! Skip this"
 
 			if df_train is not None:
-				y = generateScoreData(df_train)
+				y = generateScoreData(df_train, is_score)
 				h, d, a = generateXData(df_train)
 
 				for i in range(len(h)):
