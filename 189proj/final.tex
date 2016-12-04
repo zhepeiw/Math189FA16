@@ -1,0 +1,101 @@
+\documentclass[12pt]{article}
+\usepackage{enumerate}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{etoolbox}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\newcommand{\Name}[1]{\noindent \textbf{Name:} #1 \\}
+
+\begin{document}
+
+\begin{center}
+	\bf
+	Big Data in Mathematics \\
+	Fall 2016 \\
+	\rm
+	Final Project Report \\
+	Due:  Monday, Dec 5, 2016 \\
+\end{center}
+
+
+\section*{Estimate Soccer Match Results with Gambling Bet}
+
+\Name{Zhepei Wang, Zhenghan Zhang} 
+
+\section{Introduction}
+
+\paragraph{}
+There are millions of soccer fans around the world who are enthusiastic about predicting the results of soccer games. In particular, many soccer fans rely heavily on the odds handicap provided by gambling bet companies. However, gamblers normally will just analyze the odds data of one upcoming game and try to make their best bet out of it. After learning different methods of analyzing big data, we are curious whether gamblers could make a even better bet by using odds data and results of all previous soccer games.
+
+\paragraph{}
+We obtained a wide range of odds data for games from \url{http://football-data.co.uk/data.php}. These data include the full-time scores for each individual match, and the odds handicap from over 10 gambling bet companies. There are roughly 400 matches for each season and each league, and the data set includes data for over 15 seasons. We have data from 4 leagues from England, 3 leagues from Scotland, 2 leagues from Germany, 2 leagues from Spain, 2 leagues from Italy, 2 leagues from France, and 1 league from Portugal. The range of data, which covers most of the major soccer leagues in Europe and different divisions for each country, will help us eliminate compound variables  as much as possible. Nine-tenth of the dataset will be used as training data, while the rest tenth will be the validation data.
+
+\paragraph{}
+Before discussing the fitting algorithms,we first described a model to process the bet data and the score data. Then, to investigate the relationship between the match results and the betting odds data, we first did a naive algorithm, choosing the minimum of the betting odds to be the prediction. Then, we tried a polynomial regression model, a multi-class classification algorithm with a single, integrated feature, and a support vector machine algorithm. The naive algorithm, without training any data, has a poor performance. The polynomial regression model does a better job than the naive algorithm, but it performs worse than the classification algorithms in terms of prediction accuracy. Between the two classification algorithms, the support vector machine has the highest accuracy, slightly higher than the one with an integrated feature, while the latter has significantly less running time.
+
+
+\section{Data Processing}
+\paragraph{}
+The input csv data consists of important match data. We used data of 90 percent of the matches for training, and the rest 10 percent for validation. For our interest, the data we would take into training and validation are those about scores and bets. Each set of score data contains the goals from home team and the goals from away team. Each set of gambling data, from a single company, consists of three points: the odds for home win, the odds for draw, and the odds for away win.
+\paragraph{}
+ We calculate the score difference between the home team and the away team as the dependent variable, and we calculate an "adjusted odds" representing the bet data for each match. The following sections explain this process in detail.
+
+\subsection{Handling Score Data}
+\paragraph{} 
+Let $N$ be the total number of matches in the dataset. We read the columns corresponding to the score for home teams and the score for away teams. For each match, we subtract the score of the away team from the score of the home team. Hence, in the resulting score data, if the home team wins, the value is positive; if the away team wins, the value is negative; otherwise, the two teams draw, and the value is 0. In othe words, for each match $i$, we have the goal difference \[
+yd_i = HG_i - AG_i
+\] where $HG, AG$ denote the goal for home team and away team, respectively.
+\paragraph{}
+With the score differences, we then generate the match result data $\mathbf{Y}$ to be a $N \times 1$ column, where each entry of $\mathbf{Y}$, $y_i$, is defined as following:
+\begin{itemize}
+ \item If $yd_i > 0$, we define  $y_i = 1$, indicating a home win.
+ \item If $yd_i = 0$, we define $y_i = 0$, indicating a draw.
+ \item If $yd_i < 0$, we define $y_i = -1$, indicating a home loss.
+\end{itemize}
+
+\subsection{Adjusting Odds Data}
+\subsubsection{Distribution of Data against Features}
+%TODO: Haunter
+\subsubsection{Adjusting Odds for a Single Company}
+\paragraph{}
+Suppose for the $i^{\text{th}}$ match we have a set of bet data $(h_i, d_i, a_i)$, where $h_i, d_i, a_i$ stand for the gambling rate for this match for home win, draw, and away win, respectively. We want to generate one single feature that is able to characterize the three gambling rates provided. The characterization we provide here is \[
+x_i = \log(\frac{1}{3}(\frac{h_i}{a_i} + \frac{h_i}{d_i} + \frac{d_i}{a_i}))
+\]
+\paragraph{}
+Suppose in this match we have $h_i \ll d_i \ll a_i$. This indicates that the home team is very likely to win. We have $\frac{1}{3}(\frac{h_i}{a_i} + \frac{h_i}{d_i} + \frac{d_i}{a_i}) < 1$, and hence we will have $x_i < 0$. 
+\paragraph{}
+By symmetry, if $h_i \gg d_i \gg a_i$, the data suggests a home loss, and we will have $x_i > 0$.
+\paragraph{}
+If $h_i \approx d_i \approx a_i$, the data suggests a high likelihood of draw, and we will have $x_i \approx 0$.
+\paragraph{}
+Hence, the value of $x_i$ is a good indicator of the result of the match.
+\subsubsection{Adjusting Odds for Multiple Companies}
+\paragraph{}
+The previous section discusses the characterization of bet data for a single company. In the following section, we will discuss how to characterize the data for multiple companies.
+\paragraph{}
+Suppose we have a list of odds for home wins from $k$ companies for a match $i$, say, $[h_{i1}, h_{i2} \ldots h_{ik}]$. We want to find the expected odds for home win from these $k$ values. Recall that $h_i$ stands for the amount of money you would receive if you bet bome win for one unit of money, given that the home team wins eventually. Suppose each bet company has an equal weight of $\frac{1}{k}$. We can see that \[
+E(h_i) = \sum_{j = 1}^{k}h_{ij}p(j) = \sum_{j = 1}^{k}h_{ij}\frac{1}{k} = \frac{\sum_{j = 1}^{k}h_{ij}}{k}
+\]
+for $k$ companies. Similarly, we have $
+E(a_i) = \frac{\sum_{j = 1}^{k}a_{ij}}{k}$ and $ E(d_i) = \frac{\sum_{j = 1}^{k}d_{ij}}{k}$.
+\paragraph{}
+Therefore, we have our adjusted feature \[
+x_i = \log(\frac{1}{3}(\frac{E(h_i)}{E(a_i)} + \frac{E(h_i)}{E(d_i)} + \frac{E(d_i)}{E(a_i)}))
+\]
+\section{Learning Algorithms}
+\subsection{Naive Guessing}
+
+\subsection{Linear Regression}
+%TODO: Prof
+\subsection{Multi-class Classification with Single Feature}
+%TODO: Haunter
+\subsection{Support Vector Machine with Extended Features}
+
+\section{Discussion}
+\subsection{Efficiency and Performance of Different Algorithms}
+\subsection{Next Steps}
+
+\end{document}
