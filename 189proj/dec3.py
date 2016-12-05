@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import random
 import math
+from time import time
 from collections import defaultdict
 
 def generateData(trainRatio):
@@ -153,7 +154,13 @@ fVal = generateFeature(xVal1, xVal2, xVal3)
 
 # plotHist(fTrain, yTrain)
 print "naive: choosing min " , genReportNaive(xVal1, xVal2, xVal3, yVal)
+
+start = time()
 print "1D prediction: ", genReport1D(fTrain, yTrain, fVal, yVal)
+end = time()
+
+print "Peformance: {}".format(end - start)
+
 
 
 # accu = generateSVM(xTrain1, xTrain2, xTrain3, yTrain, \
