@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import random
 import math
+from time import time
 from collections import defaultdict
 
 def plotGen2D(x1, x2, score):
@@ -60,7 +61,7 @@ def generateSVM(x1, x2, x3, score, valx1, valx2, valx3, valScore):
 	from sklearn.decomposition import KernelPCA
 	plt.figure(1)
 	plt.style.use('ggplot')
-	kpca = KernelPCA(kernel="rbf", fit_inverse_transform=True, gamma=10)
+	kpca = KernelPCA(kernel="poly", fit_inverse_transform=True, gamma=10)
 
 	feature1, val1 = x1**2, valx1**2
 	feature2, val2 = x2**0.5, valx2**0.5
@@ -69,14 +70,21 @@ def generateSVM(x1, x2, x3, score, valx1, valx2, valx3, valScore):
 	feature5, val5 = np.log(x1**2 / x3), np.log(valx1**2 / valx3)
 
 	X = [[feature1.item(i), feature2.item(i), feature3.item(i), feature4.item(i), feature5.item(i)] for i in range(len(x1))]
+	# X = [[feature1.item(i), feature2.item(i), feature3.item(i)] for i in range(len(x1))]
 	# X_kpca = kpca.fit_transform(X)
 	# print X_kpca
 	# print np.matrix(X).shape, np.matrix(X_kpca).shape
 	from sklearn import svm
-	clf = svm.SVC(decision_function_shape='ovo')
+
+	start = time()
+	clf = svm.SVC(decision_function_shape='ovr')
 	clf.fit(X, score)
+	end = time()
+
+	print "Peformance: {}".format(end - start)
 
 	Val = [[val1.item(i), val2.item(i), val3.item(i), val4.item(i), val5.item(i)] for i in range(len(valx1))]
+	# Val = [[val1.item(i), val2.item(i), val3.item(i)] for i in range(len(valx1))]
 	count = 0
 	for i in range(len(Val)):
 		if clf.predict(Val[i]).item(0) == valScore[i]:

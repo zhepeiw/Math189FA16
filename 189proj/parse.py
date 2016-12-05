@@ -15,7 +15,7 @@ companyList = [
 ]
 
 dirname = "data"
-years = [os.path.join(dirname, o) for o in os.listdir(dirname) if os.path.isdir(os.path.join(dirname, o))][0:17]
+years = [os.path.join(dirname, o) for o in os.listdir(dirname) if os.path.isdir(os.path.join(dirname, o))]
 
 def generateScoreData(dataSet, is_score=False):
 	FTHomeScore = dataSet[['FTHG']].as_matrix()
