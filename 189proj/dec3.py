@@ -11,7 +11,6 @@ def generateData(trainRatio):
 	import parse
 	xData, yData = parse.generate()
 	xData, yData = np.matrix(xData), np.matrix(yData)
-	# print len(yData.tolist()[0])
 	trainBound = int(trainRatio * xData.shape[1])
 	xTrain, yTrain = xData[:, :trainBound], yData[:, :trainBound]
 	xVal, yVal = xData[:, trainBound:], yData[:, trainBound:]
@@ -20,7 +19,6 @@ def generateData(trainRatio):
 def plotGen2D(x1, x2, score):
 	plt.figure(1)
 	plt.style.use('ggplot')
-	# plt.subplot(211)
 	xLose = [x1[i] for i in range(len(x1)) if score[i] == -1]
 	yLose = [x2[i] for i in range(len(x2)) if score[i] == -1]
 
@@ -54,7 +52,7 @@ def plotGen2D(x1, x2, score):
 def plotGen3D(x1, x2, x3, score):
 	plt.figure(1)
 	plt.style.use('ggplot')
-	# plt.subplot(211)
+
 	xLose = [x1[i] for i in range(len(x1)) if score[i] == -1]
 	yLose = [x2[i] for i in range(len(x2)) if score[i] == -1]
 	zLose = [x3[i] for i in range(len(x3)) if score[i] == -1]
@@ -146,7 +144,7 @@ def genReport1D(fTrain, yTrain, fVal, yVal):
 def plotHist(f, score):
 	plt.figure(1)
 	plt.style.use('ggplot')
-	# plt.subplot(211)
+
 	xLose = [f[i] for i in range(len(f)) if score[i] == -1]
 	xDraw = [f[i] for i in range(len(f)) if score[i] == 0]
 	xWin = [f[i] for i in range(len(f)) if score[i] == 1]

@@ -17,7 +17,6 @@ order = 3
 def generatePrediction(x_train, y_train, x_val):
 	param = np.polyfit(x_train, y_train, order)
 	yGen = np.poly1d(param)
-	# paramList = [linregMat.item(i) for i in range(len(linregMat))]
 
 	y_pred = [yGen(x) for x in x_val]
 	return y_pred
@@ -72,7 +71,7 @@ def generateData(trainRatio):
 	import parse
 	xData, yData = parse.generate(is_score=True)
 	xData, yData = np.matrix(xData), np.matrix(yData)
-	# print len(yData.tolist()[0])
+
 	trainBound = int(trainRatio * xData.shape[1])
 	xTrain, yTrain = xData[:, :trainBound], yData[:, :trainBound]
 	xVal, yVal = xData[:, trainBound:], yData[:, trainBound:]
