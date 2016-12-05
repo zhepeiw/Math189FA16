@@ -7,10 +7,16 @@
 \usepackage{graphicx}
 \usepackage{hyperref}
 
+\usepackage[table]{xcolor}
+\setlength{\arrayrulewidth}{1mm}
+\setlength{\tabcolsep}{18pt}
+\renewcommand{\arraystretch}{2.5}
+{\rowcolors{3}{gray!50!}{gray!10!}
+	
+	
 \newcommand{\Name}[1]{\noindent \textbf{Name:} #1 \\}
 
 \begin{document}
-
 \begin{center}
 	\bf
 	Big Data in Mathematics \\
@@ -26,16 +32,12 @@
 \Name{Zhepei Wang, Zhenghan Zhang} 
 
 \section{Introduction}
-
 \paragraph{}
 There are millions of soccer fans around the world who are enthusiastic about predicting the results of soccer games. In particular, many soccer fans rely heavily on the odds handicap provided by gambling bet companies. However, gamblers normally will just analyze the odds data of one upcoming game and try to make their best bet out of it. After learning different methods of analyzing big data, we are curious whether gamblers could make a even better bet by using odds data and results of all previous soccer games.
-
 \paragraph{}
 We obtained a wide range of odds data for games from \url{http://football-data.co.uk/data.php}. These data include the full-time scores for each individual match, and the odds handicap from over 10 gambling bet companies. There are roughly 400 matches for each season and each league, and the data set includes data for over 15 seasons. We have data from 4 leagues from England, 3 leagues from Scotland, 2 leagues from Germany, 2 leagues from Spain, 2 leagues from Italy, 2 leagues from France, and 1 league from Portugal. The range of data, which covers most of the major soccer leagues in Europe and different divisions for each country, will help us eliminate compound variables  as much as possible. Nine-tenth of the dataset will be used as training data, while the rest tenth will be the validation data.
-
 \paragraph{}
 Before discussing the fitting algorithms,we first described a model to process the bet data and the score data. Then, to investigate the relationship between the match results and the betting odds data, we first did a naive algorithm, choosing the minimum of the betting odds to be the prediction. Then, we tried a polynomial regression model, a multi-class classification algorithm with a single, integrated feature, and a support vector machine algorithm. The naive algorithm, without training any data, has a poor performance. The polynomial regression model does a better job than the naive algorithm, but it performs worse than the classification algorithms in terms of prediction accuracy. Between the two classification algorithms, the support vector machine has the highest accuracy, slightly higher than the one with an integrated feature, while the latter has significantly less running time.
-
 
 \section{Data Processing}
 \paragraph{}
@@ -58,10 +60,25 @@ With the score differences, we then generate the match result data $\mathbf{Y}$ 
 
 \subsection{Adjusting Odds Data}
 \subsubsection{Distribution of Data against Features}
-%TODO: Haunter
+\paragraph{} For each match, we have a set of three odds data $(h, d, a)$, where $h, d, a$ are positive real numbers representing the gambling rate for home win, draw, and home loss, respectively. Intuitively, if the home team is much stronger than the away team, we expect $h = \min(h, d, a)$, since the money awarded for a home win is less than that for a draw or a home loss. Conversely, if the away team is much stronger, we would expect $a = \min(h, d, a)$. Hence, when plotting the feature of $a$ against $h$, we expect all the data points lie on a decreasing curve. The following is a set of plots of $a$ versus $h$, separated by the result of each match into three subplots:
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[width=0.5\textwidth]{2D_15.png}
+	\caption{Scatter plot of data points with odds for home loss versus odds for home win. The dataset plotted is from season 2015 and beyond. A high odds for home win suggests a low odds for home loss, and vice versa.}
+\end{figure}
+\paragraph{}
+A 3D plot of data points for all three features, $h, d$ and $a$, is as following:
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[width=0.5\textwidth]{3D_15.png}
+	\caption{3D Scatter plot of data points with odds for all three features. The dataset plotted is from season 2015 and beyond.}
+\end{figure}
+\paragraph{}
+Notice that for both 2D and 3D scatter plots, we have the shape of the curves similar in all class labels, while the cluster of data takes place at slightly different coordinates.
+
 \subsubsection{Adjusting Odds for a Single Company}
 \paragraph{}
-Suppose for the $i^{\text{th}}$ match we have a set of bet data $(h_i, d_i, a_i)$, where $h_i, d_i, a_i$ stand for the gambling rate for this match for home win, draw, and away win, respectively. We want to generate one single feature that is able to characterize the three gambling rates provided. The characterization we provide here is \[
+Suppose for the $i^{\text{th}}$ match we have a set of bet data $(h_i, d_i, a_i)$, where $h_i, d_i, a_i$ stand for the gambling rate for this match for home win, draw, and home loss, respectively. We want to generate a single feature that is able to characterize the three gambling odds provided. The characterization we provide here is \[
 x_i = \log(\frac{1}{3}(\frac{h_i}{a_i} + \frac{h_i}{d_i} + \frac{d_i}{a_i}))
 \]
 \paragraph{}
@@ -87,15 +104,56 @@ x_i = \log(\frac{1}{3}(\frac{E(h_i)}{E(a_i)} + \frac{E(h_i)}{E(d_i)} + \frac{E(d
 \]
 \section{Learning Algorithms}
 \subsection{Naive Guessing}
-
-\subsection{Linear Regression}
+\paragraph{}
+Intuitively, given a set of odds $(h, d, a)$ for a match, we would look for the result corresponding to the minimum value of the odds to be our prediction. In other words, the higher the gambling rate is, the more money will be awarded if the result becomes true, and the less likely the result will happen.
+\paragraph{}
+Based on the intuition, we make predictions on the validation dataset based on the minimum rate without training any data. The accuracy obtained is $23.78 \%$, even less than the expected value for a random guessing without knowing the odds, which is $\frac{1}{3}$.
+\subsection{Polynomial Regression}
 %TODO: Prof
 \subsection{Multi-class Classification with Single Feature}
-%TODO: Haunter
+\paragraph{}
+Next, we describe a classification model using an integrated feature. This is the feature that we used for polynomial regression, as described in section 2.2.3. The following is a histogram showing the number of data points falls according to this feature:
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[width=0.5\textwidth]{1D_all.png}
+	\caption{Histogram of data over the integrated feature, $x_i$.}
+\end{figure}
+\paragraph{}
+The shape of the three subplots resembles a gaussian distribution as the datasize increases. Furthermore, the mean for each class is different, with $\mu_{\text{home win}} < \mu_{\text{draw}} < \mu_{\text{home loss}}$.
+\paragraph{}
+Based on our observations above, we generate a gaussian distribution for each of the three classes with $N ~ (E_k[x], V_k[x])$, where $E_k[x], V_k[x]$ are the mean and variance of the feature $x$ in class $k$, for $k = \{-1, 0, 1\}$ corresponding to the match results.
+\paragraph{}
+Then, to predict the result given a set of odds for a match, we first transform the odds $(h_i, d_i, a_i)$ to get $x_i$, and we then calculate the probability density of $x_i$ in each of the three distributions. We predict \[
+\hat{y_i} = \arg\max_k(p_k)
+\] where $p_k$ is the probability density of class $k$, to be the distribution with the highest pdf.
+\paragraph{}
+We run the prediction on the validation set to predict $\hat{y_i}$ for each match, and then compare with the real result $y_i$. The prediction accuracy of the algorithm is $48.14 \%$.
+\paragraph{}
+We also fit the data in the model of Laplace distribution with parameters $\mu = 
+E_k[x]$ to be the mean and $\lambda = \sqrt{V_k[x]}$ to be the standard deviation of the training dataset for each class, and we repeat the procedure above. The accuracy obtained is $47.54\%$.
 \subsection{Support Vector Machine with Extended Features}
-
+%TODO: Prof
 \section{Discussion}
 \subsection{Efficiency and Performance of Different Algorithms}
+\paragraph{}
+The naive guessing algorithm, based on the minimum entry of odds, does a poor job for prediction and we therefore exclude the discussion for the naive algorithm. The prediction accuracy for the other algorithms discussed are listed in the following table:
+\newline
+\begin{tabular}{ |p{9cm}|p{2cm}|  }
+	\hline
+	\multicolumn{2}{|c|}{Prediction Accuracy} \\
+	\hline
+	Algorithms & Accuracy \\
+	\hline
+	Polynomial Regression & TDB \\ 
+	Classification with Integrated Feature (Gaussian) & 48.14 \% \\
+	Classification with Integrated Feature (Laplace) & 47.54 \% \\
+	Support Vector Machine & TBD \\
+	\hline
+\end{tabular}
+\paragraph{}
+From the table, we can see that the support vector machine algorithm has the best prediction accuracy, being slightly higher than the classification algorithms with a single integrated feature. These classification algorithms has a better prediction rates than the polynomial regression algorithms.
+\paragraph{}
+In terms of running time efficiency, the classification algorithms with a single integrated feature runs much faster than other algorithms, while support vector machine, despite being the optimal with respect to prediction accuracy, has the longest running time.
 \subsection{Next Steps}
 
 \end{document}
