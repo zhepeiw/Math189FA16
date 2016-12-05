@@ -87,38 +87,41 @@ def plotGen():
 
 	# plot mse
 	plt.style.use('ggplot')
-	plt.subplot(211)
+	# plt.subplot(121)
 
 	mseDict = generateMseDict()
 	sortedLambList = [key for key in sorted(mseDict)]
 	MSE = [mseDict[k] for k in sortedLambList]
 
-	MSEPlot = plt.plot(sortedLambList, MSE)
-	plt.setp(MSEPlot, color='yellow')
+	MSEPlot, = plt.plot(sortedLambList, MSE)
+	plt.setp(MSEPlot, color='red')
 	plt.title('RMSE vs lambda')
 	plt.xlabel('lambda')
 	plt.ylabel('RMSE')
+	# plt.legend((MSEPlot), ("RMSE"), loc=1)
 
 	# plot norm
+	plt.figure(2)
 	plt.style.use('ggplot')
-	plt.subplot(212)
+	# plt.subplot(122)
 	norm = generateNorm()
 	normDict = {}
 	for i in range(len(norm)):
 		normDict[lambList[i]] = norm[i]
 	sortedLambList = [key for key in sorted(normDict)]
 	norm = [normDict[k] for k in sortedLambList]
-	normPlot = plt.plot(sortedLambList, norm)
+	normPlot, = plt.plot(sortedLambList, norm)
 	# 
 	plt.setp(normPlot, color='blue')
-	plt.title('norm vs lambda')
+	plt.title('Norm vs Lambda')
 	plt.xlabel('lambda')
 	plt.ylabel('norm')
+	# plt.legend((normPlot), ("norm"), loc=1)
 
 	plt.tight_layout()
 	plt.show()
 
-# plotGen()
+plotGen()
 
 def findOptReg():
 	MSE = generateMse()
@@ -224,5 +227,5 @@ def gradientDescent():
 
 	# plot
 	# plotGenE(obj_train, obj_val, range(ITERNUM))
-gradientDescent()
+# gradientDescent()
 

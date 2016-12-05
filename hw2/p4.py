@@ -80,7 +80,9 @@ plt.ylabel('$w_i$')
 
 # find most important features
 plt.subplot(212)
-np.array(df.columns)[np.argsort(-W[:,9])[:5]+1]
+topFeatures = np.array(df.columns)[np.argsort(-W[:,9])[:5]+1]
+print 'top features', topFeatures
+# top features ['LDA_00' 'timedelta' 'LDA_01' 'global_subjectivity' 'LDA_04']
 w, obj = lasso_grad(X, y, reg=1e5, lr=1e-12, eps=1e-2, max_iters=2500, batch_size=1024, verbose=True, print_freq=250)
 plt.title("Lasso Objective Convergence")
 plt.ylabel("Stochastic Objective")

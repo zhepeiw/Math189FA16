@@ -28,10 +28,7 @@ def EM(X, k, theta, objective, likelihood, m_step, max_iter=100, print_freq=10):
 
 def gmm(X, k, prior_alpha, max_iter=100, print_freq=10):
 	S_0 = np.diag(np.std(X, axis=0)**2) / k**(1/X.shape[1])
-	# print X.item(1)
-	# sth = np.std(X, axis=0)
-	# S_0 = np.diag(sth)
-	# return
+
 	Theta = namedtuple("GMM", "mean cov")
 	theta = Theta(mean=X[np.random.randint(0, X.shape[0], (k,))], cov=np.tile(S_0, (k, 1, 1)),)
 
@@ -71,21 +68,23 @@ y[:red.shape[0]] = 1
 
 k = 2
 obj, r, pi, theta = gmm(X, k, np.ones(2), max_iter=30, print_freq=10)
+y_pred = np.argmax(r, axis=1)
+# print y_pred.item(5)
 
 def plotGen(obj, r, pi, theta, k=2):
-	plt.style.use('bmh')
+	# plt.style.use('bmh')
 	plt.figure(1)
 	plt.title('2 Component MAP GMM')
 	plt.xlabel('# Iteration')
 	plt.ylabel('Log likelihood')
 	plt.plot(obj, 'r')
-	plt.savefig('convergence_3.pdf', format='pdf')
+	# plt.savefig('convergence_3.pdf', format='pdf')
 
 	plt.figure(2)
 	plt.rcParams.update(plt.rcParamsDefault)
 	plt.style.use('default')
-	y_pred = np.argmax(r, axis=1)
-	plt.imshow(metrics.confusion_matrix(y, ~y_pred.astype(bool),), cmap='inferno')
+	# y_pred = np.argmax(r, axis=1)
+	plt.imshow(metrics.confusion_matrix(y, ~y_pred.astype(bool),), cmap=plt.cm.gray_r)
 	plt.title('GMM Confusion Matrix')
 	plt.xlabel('Predicted')
 	plt.ylabel('True')
@@ -97,7 +96,6 @@ def plotGen(obj, r, pi, theta, k=2):
 	plt.yticks(ticks, classes)
 	plt.tight_layout()
 	plt.savefig('confusion_3.pdf', format='pdf')
-
 	plt.show()
 
 plotGen(obj, r, pi, theta)

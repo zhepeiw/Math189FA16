@@ -23,7 +23,7 @@ def findOptTheta(X, Y, V, alpha=1.8, max_iter=10000, freq=100):
     while itr < max_iter:
         mu = sigmoid(theta.transpose() * X)
         mu = np.matrix(mu).transpose()
-        grad = X * (mu - Y) - 0.5 * (Vinv + Vinv.transpose()) * theta
+        grad = X * (mu - Y) + 0.5 * (Vinv + Vinv.transpose()) * theta
         gradNorm = np.linalg.norm(grad)
         diff = gradNorm - prevGradNorm
         if diff > 0:
@@ -45,7 +45,7 @@ def hessian(theta, X, V):
     S = np.matrix(S)
 
     Vinv = np.linalg.inv(V)
-    return X * S * X.transpose() - 0.5 * (Vinv + Vinv.transpose())
+    return X * S * X.transpose() + 0.5 * (Vinv + Vinv.transpose())
 
 theta_opt = findOptTheta(X.transpose(), Y.transpose(), V0)
 hessian_opt = hessian(theta_opt, X.transpose(), V0)
@@ -169,8 +169,8 @@ def genPredPlot(X, Y):
     plt.hist([value.item(i) for i in range(value.shape[1])], bins=100)
     plt.title('Histogram of Prediction Difference in MCMC and MAP')
     plt.savefig('p3.pdf', format='pdf')
-    
+
     plt.tight_layout()
     plt.show()
 
-# genDataPlot(X, Y)
+genPredPlot(X, Y)

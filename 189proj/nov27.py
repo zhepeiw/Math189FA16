@@ -9,25 +9,34 @@ from collections import defaultdict
 
 def plotGen2D(x1, x2, score):
 	plt.figure(1)
-	plt.style.use('bmh')
+	plt.style.use('ggplot')
 	# plt.subplot(211)
-	xLose = [np.log(x1[i]) for i in range(len(x1)) if score[i] == -1]
+	xLose = [x1[i] for i in range(len(x1)) if score[i] == -1]
 	yLose = [x2[i] for i in range(len(x2)) if score[i] == -1]
 
-	xDraw = [np.log(x1[i]) for i in range(len(x1)) if score[i] == 0]
+	xDraw = [x1[i] for i in range(len(x1)) if score[i] == 0]
 	yDraw = [x2[i] for i in range(len(x2)) if score[i] == 0]
 
-	xWin = [np.log(x1[i]) for i in range(len(x1)) if score[i] == 1]
+	xWin = [x1[i] for i in range(len(x1)) if score[i] == 1]
 	yWin = [x2[i] for i in range(len(x2)) if score[i] == 1]
 
-	losePlot, = plt.plot(xLose, yLose,'ro')
-	drawPlot, = plt.plot(xDraw, yDraw,'bo')
+	plt.subplot(1,3,1)
 	winPlot, = plt.plot(xWin, yWin, 'go')
-	plt.legend((losePlot,drawPlot,winPlot), ("Home Lose","Draw","Home Win"), loc=1)
+	plt.title('Home Wins')
+	plt.axis([0.0, 15.0, 0.0, 15.0])
+	plt.subplot(1,3,2)
+	drawPlot, = plt.plot(xDraw, yDraw,'bo')
+	plt.title('Draws')
+	plt.axis([0.0, 15.0, 0.0, 15.0])
+	plt.subplot(1,3,3)
+	losePlot, = plt.plot(xLose, yLose,'ro')
+	plt.title('Home Losses')
+	plt.axis([0.0, 15.0, 0.0, 15.0])
+	# plt.legend((losePlot,drawPlot,winPlot), ("Home Lose","Draw","Home Win"), loc=1)
 
 	plt.show()
 
-def plotGen(x1, x2, x3, score):
+def plotGen3D(x1, x2, x3, score):
 	plt.figure(1)
 	plt.style.use('ggplot')
 	# plt.subplot(211)
@@ -48,12 +57,25 @@ def plotGen(x1, x2, x3, score):
 	# winPlot, = plt.plot(xWin, yWin, 'go')
 	# plt.legend((losePlot,drawPlot,winPlot), ("Home Lose","Draw","Home Win"), loc=1)
 
-	fig = plt.figure()
-	ax = fig.add_subplot(111, projection='3d')
+	ax = plt.subplot(131, projection='3d')
 	ax.scatter(xLose, yLose, zLose,c='r', marker='o')
+	ax.set_xlim3d(0, 10)
+	ax.set_ylim3d(0, 10)
+	ax.set_zlim3d(0, 10)
+	plt.title('Losses')
+	ax = plt.subplot(132, projection='3d')
 	ax.scatter(xDraw, yDraw, zDraw,c='b', marker='o')
+	ax.set_xlim3d(0, 10)
+	ax.set_ylim3d(0, 10)
+	ax.set_zlim3d(0, 10)
+	plt.title('Draws')
+	ax = plt.subplot(133, projection='3d')
 	ax.scatter(xWin, yWin, zWin,c='g', marker='o')
-	plt.title('Plot')
+	ax.set_xlim3d(0, 10)
+	ax.set_ylim3d(0, 10)
+	ax.set_zlim3d(0, 10)
+	plt.title('Wins')
+	# plt.title('Plot')
 
 	plt.show()
 
@@ -113,8 +135,12 @@ yVal = np.asarray(yVal).reshape(len(yVal), 1)
 del xTrain, xVal
 
 
-accu = generateSVM(xTrain1, xTrain2, xTrain3, yTrain, \
-	xVal1, xVal2, xVal3, yVal)
-print "Prediction accuracy: {}".format(str(accu))
-# plotGen2D(xTrain1, xTrain3, yTrain)
+
+
+# accu = generateSVM(xTrain1, xTrain2, xTrain3, yTrain, \
+# 	xVal1, xVal2, xVal3, yVal)
+# print "Prediction accuracy: {}".format(str(accu))
 # Accuracy: 0.491675757719
+
+# plotGen2D(xTrain1, xTrain3, yTrain)
+plotGen3D(xTrain1, xTrain2, xTrain3, yTrain)

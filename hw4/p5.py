@@ -8,6 +8,10 @@ def NMF(V, r, max_iter=200, tolerance=1e-3, print_frq = 20):
 	m = V.shape[1]
 	obj = []
 
+	def dist(V, U):
+		assert(V.shape == U.shape)	
+		return np.linalg.norm(V - U)
+		
 	def genW(row, col, W, VHt, WHHt):
 		return W.item(row, col) * (VHt.item(row, col)) / (WHHt.item(row, col))
 
@@ -33,9 +37,7 @@ def NMF(V, r, max_iter=200, tolerance=1e-3, print_frq = 20):
 	
 	return W, H, obj
 
-def dist(V, U):
-	assert(V.shape == U.shape)	
-	return np.linalg.norm(V - U)
+
 
 def genCvgPlot(obj):
 	plt.style.use('bmh')

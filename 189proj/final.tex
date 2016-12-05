@@ -17,6 +17,7 @@
 	
 	
 \newcommand{\Name}[1]{\noindent \textbf{Name:} #1 \\}
+\newcommand{\Help}[1]{\noindent \textbf{Received Help from:} #1 \\}
 
 \begin{document}
 \begin{center}
@@ -32,6 +33,7 @@
 \section*{Estimate Soccer Match Results with Gambling Bet}
 
 \Name{Zhepei Wang, Zhenghan Zhang} 
+\Help{Prof. Weiqing Gu, Prof. Robert Keller, Natchanon Suaysom}
 
 \section{Introduction}
 \paragraph{}
@@ -142,7 +144,9 @@ Next, we describe a classification model using an integrated feature. This is th
 \paragraph{}
 The shape of the three subplots resembles a gaussian distribution as the datasize increases. Furthermore, the mean for each class is different, with $\mu_{\text{home win}} < \mu_{\text{draw}} < \mu_{\text{home loss}}$.
 \paragraph{}
-Based on our observations above, we generate a gaussian distribution for each of the three classes with $N ~ (E_k[x], V_k[x])$, where $E_k[x], V_k[x]$ are the mean and variance of the feature $x$ in class $k$, for $k = \{-1, 0, 1\}$ corresponding to the match results.
+Based on our observations above, we generate a gaussian distribution for each of the three classes with \[
+\mathcal{N} (\mathbb{E}_k[x], \mathbb{V}_k[x]),
+\] where $\mathbb{E}_k[x], \mathbb{V}_k[x]$ are the mean and variance of the feature $x$ in class $k$, for $k = \{-1, 0, 1\}$ corresponding to the match results.
 \paragraph{}
 Then, to predict the result given a set of odds for a match, we first transform the odds $(h_i, d_i, a_i)$ to get $x_i$, and we then calculate the probability density of $x_i$ in each of the three distributions. We predict \[
 \hat{y_i} = \arg\max_k(p_k)
@@ -151,7 +155,7 @@ Then, to predict the result given a set of odds for a match, we first transform 
 We run the prediction on the validation set to predict $\hat{y_i}$ for each match, and then compare with the real result $y_i$. The prediction accuracy of the algorithm is $48.14 \%$.
 \paragraph{}
 We also fit the data in the model of Laplace distribution with parameters $\mu = 
-E_k[x]$ to be the mean and $\lambda = \sqrt{V_k[x]}$ to be the standard deviation of the training dataset for each class, and we repeat the procedure above. The accuracy obtained is $47.54\%$.
+\mathbb{E}_k[x]$ to be the mean and $\lambda = \sqrt{\mathbb{V}_k[x]}$ to be the standard deviation of the training dataset for each class, and we repeat the procedure above. The accuracy obtained is $47.54\%$.
 \subsection{Support Vector Machine with Extended Features}
 
 \paragraph{}
